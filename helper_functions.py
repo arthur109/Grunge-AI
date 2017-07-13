@@ -49,6 +49,8 @@ def makeModel(params):
 
     return model
 
+def makeModelV2(params):
+    print "hi"
 
 def saveImg(imgInput, filename, params):
     # Make sure the array is the right shape
