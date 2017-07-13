@@ -8,7 +8,6 @@ from keras.utils import plot_model
 import helper_functions
 import progressbar
 
-
 # Initialize Parameters for custumization
 # The Dimension Of The Image
 params = {'Image Dimensions': {'x': 128, 'y': 128}}
