@@ -18,7 +18,7 @@ params = {
     # Print Debug Output
     'Debug Mode': True,
     # how many images in each batch
-    'Batch Size': 3,
+    'Batch Size': 10,
     # size of small batches in each normal batch:
     'Micro Batch Size': 2,
     # How many times to repatedly train on the images in the Repition folder
@@ -169,9 +169,9 @@ for r in range(params['Repetition Image Repitions']):
         # Train The Model On The Batch
         model.fit(train_batch, train_batch, epochs=1, batch_size=params['Micro Batch Size'])
 
-        print('Saving Model...')
-        # saves the model
-        model.save_weights(params['Path To Export Model To'])
+        # print('Saving Model...')
+        # # saves the model
+        # model.save_weights(params['Path To Export Model To'])
 
     # ID Of Current Image To Be Saved
         print('Evaluating...')
