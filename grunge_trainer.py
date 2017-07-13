@@ -7,12 +7,7 @@ from keras.models import load_model
 from keras.utils import plot_model
 import helper_functions
 import progressbar
-# I made a change!!
 
-
-
-#jhpiahspizuhpia;uhouhvz;uhi
-print 'githubbed'
 # Initialize Parameters for custumization
 # The Dimension Of The Image
 params = {'Image Dimensions': {'x': 128, 'y': 128}}
