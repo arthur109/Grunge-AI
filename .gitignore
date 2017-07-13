@@ -1,0 +1,9 @@
+*.pyc
+*.png
+*.jpg
+*.jpeg
+*.h5
+.DS_Store
+output/
+processed/
+dataset/
