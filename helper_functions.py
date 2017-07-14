@@ -1,7 +1,8 @@
+from keras.models import model_from_json
 from os.path import isfile, join
 from os import listdir
 import scipy.misc
-from keras.layers import Dense, Activation, Flatten, Input, Reshape
+from keras.layers import Dense, Activation, Flatten, Input, Reshape, Lambda
 from keras.models import Model
 import h5py
 import numpy as np
@@ -47,10 +48,21 @@ def makeModel(params):
                   loss=params['Network Loss'],
                   metrics=params['Network Metrics'])
 
+    if params['Should Load Model']:
+        model.load_weights()
+
     return model
 
 def makeModelV2(params):
-    print "hi"
+    inputLayer = Input(shape=(params['Image Dimensions']['x'], params['Image Dimensions']['y'], 1))
+    # Flatten Out The Image
+    prevLayer = Reshape((params['Image Dimensions']['x'] * params['Image Dimensions']['y'], ))(inputLayer)
+    start = 2
+    end = 10
+    def getRange(layerBefore):
+        return layerBefore[start:end]
+    for i in
+    neuron1=Lambda(getRange)(prevLayer)
 
 def saveImg(imgInput, filename, params):
     # Make sure the array is the right shape

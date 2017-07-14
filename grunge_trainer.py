@@ -11,10 +11,10 @@ import progressbar
 
 # Initialize Parameters for custumization
 # The Dimension Of The Image
-params = {'Image Dimensions': {'x': 128, 'y': 128}}
+params = {'Tile Image Dimensions': {'x': 128, 'y': 128}}
 params = {
     # Ignore this
-    'Image Dimensions': params['Image Dimensions'],
+    'Tile Image Dimensions': params['Tile Image Dimensions'],
     # Print Debug Output
     'Debug Mode': True,
     # how many images in each batch
@@ -36,7 +36,7 @@ params = {
     # directory containing h5 files used for repition
     'Decompressed Repition Training Folder Directory': 'processed/Repeated_Images',
     # The Number of neurons in each layer
-    'Layer Dimensions': [params['Image Dimensions']['x'] * params['Image Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Image Dimensions']['x'] * params['Image Dimensions']['y']],
+    'Layer Dimensions': [params['Tile Image Dimensions']['x'] * params['Tile Image Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Tile Image Dimensions']['x'] * params['Tile Image Dimensions']['y']],
     # the neural networks optimizer
     'Network Optimizer': 'adam',
     # the neural networks loss function
