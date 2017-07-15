@@ -12,22 +12,18 @@ import shutil
 import os
 
 # input is a directory from which to get the files so it can return a list containg the paths of all the h5's inside it
-
-
 def loadH5sFromFolder(directory):
     return sorted([join(directory, f)
                    for f in listdir(directory)
                    if (isfile(join(directory, f)) and ("part" in f))])  # returns paths of all h5 files
 
 # input is a directory from which to get the files so it can return a list contaning the paths of all the images inside it
-
-
 def loadIMGsFromFolder(directory):
     return sorted([join(directory, f)
                    for f in listdir(directory)
                    if (isfile(join(directory, f)) and ("img" in f))])  # returns paths of all images in folder
 
-
+# creates the neural network
 def makeModel(params):
     # Create An Input Layer From The Image Dimensions
     inputLayer = Input(shape=(params['Image Dimensions']['x'], params['Image Dimensions']['y'], 1))
@@ -47,12 +43,15 @@ def makeModel(params):
     model.compile(optimizer=params['Network Optimizer'],
                   loss=params['Network Loss'],
                   metrics=params['Network Metrics'])
-
+    # if the program shoud load the model
     if params['Should Load Model']:
-        model.load_weights()
+        print 'loading model...'
+        # then it loads the model
+        model.load_weights(params['Path To Export Model To '])
+        print 'MODEL LOADED'
 
     return model
-
+'''
 def makeModelV2(params):
     inputLayer = Input(shape=(params['Image Dimensions']['x'], params['Image Dimensions']['y'], 1))
     # Flatten Out The Image
@@ -63,7 +62,7 @@ def makeModelV2(params):
         return layerBefore[start:end]
     for i in
     neuron1=Lambda(getRange)(prevLayer)
-
+'''
 def saveImg(imgInput, filename, params):
     # Make sure the array is the right shape
     imgInput = imgInput.reshape((params['Image Dimensions']['x'], params['Image Dimensions']['y'], 1))

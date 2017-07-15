@@ -12,14 +12,14 @@ import progressbar
 
 # Initialize Parameters for custumization
 # The Dimension Of The Image
-params = {'Tile Image Dimensions': {'x': 128, 'y': 128}}
+params = {'Image Dimensions': {'x': 128, 'y': 128}}
 params = {
     # Ignore this
-    'Tile Image Dimensions': params['Tile Image Dimensions'],
+    'Image Dimensions': params['Image Dimensions'],
     # Print Debug Output
     'Debug Mode': True,
     # how many images in each batch
-    'Batch Size': 10,
+    'Batch Size': 5,
     # size of small batches in each normal batch:
     'Micro Batch Size': 2,
     # How many times to repatedly train on the images in the Repition folder
@@ -37,7 +37,7 @@ params = {
     # directory containing h5 files used for repition
     'Decompressed Repition Training Folder Directory': 'processed/Repeated_Images',
     # The Number of neurons in each layer
-    'Layer Dimensions': [params['Tile Image Dimensions']['x'] * params['Tile Image Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Tile Image Dimensions']['x'] * params['Tile Image Dimensions']['y']],
+    'Layer Dimensions': [params['Image Dimensions']['x'] * params['Image Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Image Dimensions']['x'] * params['Image Dimensions']['y']],
     # the neural networks optimizer
     'Network Optimizer': 'adam',
     # the neural networks loss function
@@ -122,37 +122,38 @@ helper_functions.clearFolder(params['Evaluation Save Directory'])
 # Make A Progress Bar
 pbar = progressbar.ProgressBar()
 # loops through the number of training batches
-for trainBatchNum in pbar(range(len(train_batches))):
-    print "Batch " + str(trainBatchNum)
+# only runs if the program should retrain the model
+if params['Should Load Model'] is False:
+    for trainBatchNum in pbar(range(len(train_batches))):
+        print "Batch " + str(trainBatchNum)
 
-    # Load Current Training Batch
-    train_batch = helper_functions.loadBatch(train_batches[trainBatchNum])
-    print('Training Model')
-    # Train The Model On The Batch
-    model.fit(train_batch, train_batch, epochs=1, batch_size=params['Micro Batch Size'])
+        # Load Current Training Batch
+        train_batch = helper_functions.loadBatch(train_batches[trainBatchNum])
+        print('Training Model')
+        # Train The Model On The Batch
+        model.fit(train_batch, train_batch, epochs=1, batch_size=params['Micro Batch Size'])
 
-    # ID Of Current Image To Be Saved
-    outImgID = 0
-    print('Evaluating')
-    for evalBatchNum in range(len(eval_batches)):
-        # Load Current Evaluation Batch
-        eval_batch = helper_functions.loadBatch(eval_batches[evalBatchNum])
-        # Generate Images On Batch
-        evaluations = model.predict(eval_batch, batch_size=1)
-        # Save Each Generated Image And Its Corresponding Input
-        for i, evaluation in enumerate(evaluations):
-            helper_functions.saveImg(eval_batch[i], params['Evaluation Save Directory'] + "/Batch " + str(
-                trainBatchNum) + "-Eval " + str(outImgID) + "-input.png", params)
-            helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/Batch " + str(
-                trainBatchNum) + "-Eval " + str(outImgID) + "-output.png", params)
-            outImgID += 1
+        # ID Of Current Image To Be Saved
+        outImgID = 0
+        print('Evaluating')
+        for evalBatchNum in range(len(eval_batches)):
+            # Load Current Evaluation Batch
+            eval_batch = helper_functions.loadBatch(eval_batches[evalBatchNum])
+            # Generate Images On Batch
+            evaluations = model.predict(eval_batch, batch_size=1)
+            # Save Each Generated Imadsssge And Its Corresponding Input
+            for i, evaluation in enumerate(evaluations):
+                helper_functions.saveImg(eval_batch[i], params['Evaluation Save Directory'] + "/Batch " + str(
+                    trainBatchNum) + "-Eval " + str(outImgID) + "-input.png", params)
+                helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/Batch " + str(
+                    trainBatchNum) + "-Eval " + str(outImgID) + "-output.png", params)
+                outImgID += 1
 
-    print('Saving Model')
-    # saves the model
-    model.save_weights(params['Path To Export Model To'])
+        print('Saving Model')
+        # saves the model
+        model.save_weights(params['Path To Export Model To'])
 
 
-print np.array(repit_batches).shape
 # For loop that does the repitions of the images in the repition folder
 outImgID = 0;
 # makes a new folder to save the repition evaluation images
