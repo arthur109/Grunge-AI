@@ -46,12 +46,13 @@ def makeModel(params):
     model.compile(optimizer=params['Network Optimizer'],
                   loss=params['Network Loss'],
                   metrics=params['Network Metrics'])
+
     # if the program should load the model
     if params['Should Load Model']:
         print 'loading model...'
         # then it loads the model
         model.load_weights(params['Path To Export Model To '])
-        print 'MODEL LOADED'
+        print 'Model Loaded'
 
     return model
 
