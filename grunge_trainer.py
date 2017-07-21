@@ -8,14 +8,12 @@ from keras.utils import plot_model
 import helper_functions
 import progressbar
 
-
-
 # Initialize Parameters for custumization
 # The Dimension Of The Image that is to be considered a tile
 params = {'Tile Dimensions': {'x': 128, 'y': 128}}
 params = {
     # The idmensions of the large mimage to be processed
-    'Main Image Dimensions':{'x':1280,'y':1280},
+    'Main Image Dimensions': {'x': 1280, 'y': 1280},
     # Directory of the Main image to be proceessed
     'Main Image Directory': '1280.jpg',
     # Ignore this
@@ -41,7 +39,8 @@ params = {
     # directory containing h5 files used for repition
     'Decompressed Repition Training Folder Directory': 'processed/Repeated_Images',
     # The Number of neurons in each layer
-    'Layer Dimensions': [params['Tile Dimensions']['x'] * params['Tile Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Tile Dimensions']['x'] * params['Tile Dimensions']['y']],
+    'Layer Dimensions': [params['Tile Dimensions']['x'] * params['Tile Dimensions']['y'], 7000, 3000, 900, 3000, 7000,
+                         params['Tile Dimensions']['x'] * params['Tile Dimensions']['y']],
     # the neural networks optimizer
     'Network Optimizer': 'adam',
     # the neural networks loss function
@@ -93,7 +92,7 @@ if params['Debug Mode']:
     plot_model(model, to_file=params['Model Image Filename'], show_shapes=True)
 
 # Main Program Loop
-#Clear Eval Output Folder
+# Clear Eval Output Folder
 helper_functions.clearFolder(params['Evaluation Save Directory'])
 # Make A Progress Bar
 pbar = progressbar.ProgressBar()
@@ -129,14 +128,13 @@ if params['Should Load Model'] is False:
         # saves the model
         model.save_weights(params['Path To Export Model To'])
 
-
 # For loop that does the repitions of the images in the repition folder
 outImgID = 0
 # makes a new folder to save the repition evaluation images
-os.makedirs(params['Evaluation Save Directory']+'/repitions')
+os.makedirs(params['Evaluation Save Directory'] + '/repitions')
 
 for r in range(params['Repetition Image Repitions']):
-    print 'Repetition: '+str(r+1)+'/'+str(params['Repetition Image Repitions'])
+    print 'Repetition: ' + str(r + 1) + '/' + str(params['Repetition Image Repitions'])
     # loop that trains through the repition images once
     for trainBatchNum in range(len(repit_batches)):
 
@@ -151,7 +149,7 @@ for r in range(params['Repetition Image Repitions']):
         # # saves the model
         # model.save_weights(params['Path To Export Model To'])
 
-    # ID Of Current Image To Be Saved
+        # ID Of Current Image To Be Saved
         print('Evaluating...')
         for evalBatchNum in range(len(eval_batches)):
             # Load Current Evaluation Batch
@@ -160,9 +158,13 @@ for r in range(params['Repetition Image Repitions']):
             evaluations = model.predict(train_batch, batch_size=1)
             # Save Each Generated Image And Its Corresponding Input
             for i, evaluation in enumerate(evaluations):
+                helper_functions.saveImg(train_batch[i],
+                                         params['Evaluation Save Directory'] + "/repitions/Batch " + str(
+                                             trainBatchNum) + "-Eval " + str(outImgID) + "-input-repition.png",
+                                         params['Tile Dimensions'], params)
 
-                helper_functions.saveImg(train_batch[i], params['Evaluation Save Directory'] + "/repitions/Batch " + str(trainBatchNum) + "-Eval " + str(outImgID) + "-input-repition.png", params['Tile Dimensions'], params)
-
-                helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/repitions/Batch " + str(trainBatchNum) + "-Eval " + str(outImgID) + "-output-repition.png", params['Tile Dimensions'], params)
+                helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/repitions/Batch " + str(
+                    trainBatchNum) + "-Eval " + str(outImgID) + "-output-repition.png", params['Tile Dimensions'],
+                                         params)
 
                 outImgID += 1
