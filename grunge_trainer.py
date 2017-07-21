@@ -11,11 +11,15 @@ import progressbar
 
 
 # Initialize Parameters for custumization
-# The Dimension Of The Image
-params = {'Image Dimensions': {'x': 128, 'y': 128}}
+# The Dimension Of The Image that is to be considered a tile
+params = {'Tile Dimensions': {'x': 128, 'y': 128}}
 params = {
+    # The idmensions of the large mimage to be processed
+    'Main Image Dimensions':{'x':1280,'y':1280},
+    # Directory of the Main image to be proceessed
+    'Main Image Directory': '1280.jpg',
     # Ignore this
-    'Image Dimensions': params['Image Dimensions'],
+    'Tile Dimensions': params['Tile Dimensions'],
     # Print Debug Output
     'Debug Mode': True,
     # how many images in each batch
@@ -37,7 +41,7 @@ params = {
     # directory containing h5 files used for repition
     'Decompressed Repition Training Folder Directory': 'processed/Repeated_Images',
     # The Number of neurons in each layer
-    'Layer Dimensions': [params['Image Dimensions']['x'] * params['Image Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Image Dimensions']['x'] * params['Image Dimensions']['y']],
+    'Layer Dimensions': [params['Tile Dimensions']['x'] * params['Tile Dimensions']['y'], 7000, 3000, 900, 3000, 7000, params['Tile Dimensions']['x'] * params['Tile Dimensions']['y']],
     # the neural networks optimizer
     'Network Optimizer': 'adam',
     # the neural networks loss function
@@ -58,20 +62,6 @@ params = {
     'Model Image Filename': 'model.png'
 }
 
-# uses the fucntion make_batches in the helper_functions folder to convert the images to h5 files in the batch sizes
-# (also does it for the evaluation images)
-helper_functions.make_batches(params, [
-    # training
-    [params['Compressed Train Image Directory'],
-        params['Decompressed Train Image Directory']],
-    # evaluation
-    [params['Compressed Evaluation Image Directory'],
-        params['Decompressed Evaluation Image Directory']],
-    # repition
-    [params['Compressed Repition Training Folder Directory'],
-        params['Decompressed Repition Training Folder Directory']]
-])
-
 # Get list of directorys of training batches
 train_batches = helper_functions.loadH5sFromFolder(
     params['Decompressed Train Image Directory'])
@@ -82,24 +72,10 @@ eval_batches = helper_functions.loadH5sFromFolder(
 repit_batches = helper_functions.loadH5sFromFolder(
     params['Decompressed Repition Training Folder Directory'])
 
-
 if params['Debug Mode']:
     print 'train shape: ' + str(np.asarray(train_batches).shape)
     print 'evaluation shape: ' + str(np.asarray(eval_batches).shape)
 
-'''
-# tells user if they did not supply enough images for the training
-if len(train_batches) < params['Batch Number']:
-    print('BATCH ERROR:')
-    print('I was told to run through ' + str(params['Batch Number']) + ' batches, yet I can only create ' + str(len(train_batches)) +
-          ' batches with the number of images supplied. I need ' + str((params['Batch Number'] - len(train_batches)) * params['Batch Size']) + ' more images')
-
-# tells user if program has enough evaluation images
-if len(eval_batches) < params['Batch Number']:
-    print('EVALUATION ERROR:')
-    print('I was told to run through ' + str(params['Batch Number']) + ' batches, yet I can only create ' + str(len(eval_batches)) +
-          ' evaluation sets with the number of images supplied. I need ' + str((params['Batch Number'] - len(eval_batches)) * params['Number Of Images To Evaluate On']) + ' more images')
-'''
 # Creates the Neural Network
 model = helper_functions.makeModel(params)
 
@@ -144,9 +120,9 @@ if params['Should Load Model'] is False:
             # Save Each Generated Imadsssge And Its Corresponding Input
             for i, evaluation in enumerate(evaluations):
                 helper_functions.saveImg(eval_batch[i], params['Evaluation Save Directory'] + "/Batch " + str(
-                    trainBatchNum) + "-Eval " + str(outImgID) + "-input.png", params)
+                    trainBatchNum) + "-Eval " + str(outImgID) + "-input.png", params['Tile Dimensions'], params)
                 helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/Batch " + str(
-                    trainBatchNum) + "-Eval " + str(outImgID) + "-output.png", params)
+                    trainBatchNum) + "-Eval " + str(outImgID) + "-output.png", params['Tile Dimensions'], params)
                 outImgID += 1
 
         print('Saving Model')
@@ -155,7 +131,7 @@ if params['Should Load Model'] is False:
 
 
 # For loop that does the repitions of the images in the repition folder
-outImgID = 0;
+outImgID = 0
 # makes a new folder to save the repition evaluation images
 os.makedirs(params['Evaluation Save Directory']+'/repitions')
 
@@ -185,8 +161,8 @@ for r in range(params['Repetition Image Repitions']):
             # Save Each Generated Image And Its Corresponding Input
             for i, evaluation in enumerate(evaluations):
 
-                helper_functions.saveImg(train_batch[i], params['Evaluation Save Directory'] + "/repitions/Batch " + str(trainBatchNum) + "-Eval " + str(outImgID) + "-input-repition.png", params)
+                helper_functions.saveImg(train_batch[i], params['Evaluation Save Directory'] + "/repitions/Batch " + str(trainBatchNum) + "-Eval " + str(outImgID) + "-input-repition.png", params['Tile Dimensions'], params)
 
-                helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/repitions/Batch " + str(trainBatchNum) + "-Eval " + str(outImgID) + "-output-repition.png", params)
+                helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/repitions/Batch " + str(trainBatchNum) + "-Eval " + str(outImgID) + "-output-repition.png", params['Tile Dimensions'], params)
 
                 outImgID += 1
