@@ -105,12 +105,12 @@ def cut_up_image(params):
             # creates the array that will store an image made from one pixel of each tile
             singleLayer = np.zeros((params['Tile Dimensions']['x'], params['Tile Dimensions']['y'], 1))
             # goes throught each tile
-            for tileY, tileColumn in enumerate(images):
-                for tileX, tile in enumerate(tileColumn):
+            for tilePosX in range(len(tiles)):
+                for tilePosY in range(len(tiles[tilePosX])):
                     # and adds the specified pixel so "singleLayer"
-                    singleLayer[tileX][tileY] = tile[x][y]
+                    singleLayer[tilePosX][tilePosY] = tiles[tilePosX][tilePosY][pixelToExtractX][pixelToExtractY]
             # then adds 'singleLayer' to the main array
-            imgLayers[x][y] = singleLayer
+            imgLayers[pixelToExtractX][pixelToExtractY] = singleLayer
 
     print imgLayers.shape
 
