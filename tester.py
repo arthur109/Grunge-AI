@@ -7,7 +7,7 @@ import os
 
 # Initialize Parameters for custumization
 # The Dimension Of The Image that is to be considered a tile
-params = {'Tile Dimensions': {'x': 128, 'y': 128}}
+params = {'Tile Dimensions': {'x': 10, 'y': 10}}
 params = {
     # The idmensions of the large mimage to be processed
     'Main Image Dimensions': {'x': 1280, 'y': 640},
@@ -69,7 +69,7 @@ def cut_up_image(params):
 
     # checks if the image is the right diensions o that it can be tiled
     if (params['Main Image Dimensions']['x'] % params['Tile Dimensions']['x'] != 0) or (
-            params['Main Image Dimensions']['y'] % params['Tile Dimensions']['y'] != 0):
+                    params['Main Image Dimensions']['y'] % params['Tile Dimensions']['y'] != 0):
         # if it is not the right dimesnions it will notify the user
         print 'this image is not tileable'
 
@@ -80,22 +80,18 @@ def cut_up_image(params):
     tileYsize = params['Main Image Dimensions']['y'] / params['Tile Dimensions']['y']
 
     # createds the 2d array that will store tht tiles
-    images = np.zeros((params['Main Image Dimensions']['x'] / tileXsize,
-                       params['Main Image Dimensions']['y'] / tileYsize, tileXsize, tileYsize, 1))
+    tiles = np.zeros((params['Main Image Dimensions']['x'] / tileXsize,
+                      params['Main Image Dimensions']['y'] / tileYsize, tileXsize, tileYsize, 1))
     # loops through all positions in the array
     pbar = progressbar.ProgressBar()
-    for indX, colum in enumerate(pbar(images)):
+    for indX, colum in enumerate(pbar(tiles)):
         for indY, img in enumerate(colum):
             # the tile image
             temporary = mainImage.crop(
                 (indX * tileXsize, indY * tileYsize, (indX + 1) * tileXsize, (indY + 1) * tileYsize))
-            # the variable that stores th ename of the image
-            name = params['Decompressed Train Image Directory'] + '/tiles' + "/img" + str(indX) + "|" + str(
-                indY) + ".jpg"
-            # save sthe image
-            temporary.save(name)
+
             # converts image into an array for storage in the array images
-            images[indX][indY] = helper_functions.img_to_array(name, {'x': tileXsize, 'y': tileYsize})
+            tiles[indX][indY] = helper_functions.PILimageToNumpy(temporary)
     print 'done with tiles'
     print ''
     print 'making tile layers'
@@ -104,8 +100,8 @@ def cut_up_image(params):
 
     pbar = progressbar.ProgressBar()
     # will loop through all tile and creat the layers and splits them into mixed processes
-    for x in pbar(range(tileXsize)):
-        for y in range(tileYsize):
+    for pixelToExtractX in pbar(range(tileXsize)):
+        for pixelToExtractY in range(tileYsize):
             # creates the array that will store an image made from one pixel of each tile
             singleLayer = np.zeros((params['Tile Dimensions']['x'], params['Tile Dimensions']['y'], 1))
             # goes throught each tile
@@ -116,14 +112,14 @@ def cut_up_image(params):
             # then adds 'singleLayer' to the main array
             imgLayers[x][y] = singleLayer
 
-    print(imgLayers.shape)
+    print imgLayers.shape
 
     print 'done with tile layers'
     # then returns the final result
-    return imgLayers;
+    return np.flip(imgLayers, 0)
 
 
-def reconsitute_images(params, imgLayers):
+def reconstitute_images(params, imgLayers):
     print ''
     print 'reconsituting image'
     # the x width of a tile
@@ -156,5 +152,5 @@ except AttributeError:
     pass
 print 'folder cleared'
 
-helper_functions.saveImg(reconsitute_images(params, cut_up_image(params)), 'reconsitute.jpg',
-                         params['Main Image Dimensions'], params)
+helper_functions.saveImg(np.rot90(reconstitute_images(params, cut_up_image(params)), k=-1), "reconstitute.png",
+                         {'x': 640, 'y': 1280})

@@ -71,18 +71,19 @@ def makeModelV2(params):
 
 
 # takes in the image array, the filename of the image to be saved, the dimensions of the image as {'x':x,'y':y}, and params
-def saveImg(imgInput, filename, dimensions, params):
+def saveImg(imgInput, filename, dimensions):
     # Make sure the array is the right shape
     imgInput = imgInput.reshape((dimensions['x'], dimensions['y'], 1))
     # Make the image have 3 channels
-    img = changeChannels1to3(imgInput, dimensions, params)
+    img = changeChannels1to3(imgInput, dimensions)
     # Save the image to the specified filename
+
     scipy.misc.toimage(img, cmin=0.0, cmax=1).save(filename)
 
 
 # converts an image with only one channel(black and white) and converts it to full rgb(uduplicates the channel)
 # so it can be properly exported to an image
-def changeChannels1to3(imgInput, dimensions, params):
+def changeChannels1to3(imgInput, dimensions):
     # Create A Blank Image With 3 Channels
     img = np.zeros((dimensions['x'], dimensions['y'], 3), dtype=np.float32)
     # Loop Through Each Row In the image
@@ -160,7 +161,7 @@ def make_batches(params, inputOutputLocations):
         # and then splits it on that array (splits function on numbers in the array as index positions returning an array of arrays)
         # all in that line of code, below
         batches = np.split(images, (
-        np.array(range(1, int(len(images) / params['Batch Size']))) * params['Batch Size']).tolist())
+            np.array(range(1, int(len(images) / params['Batch Size']))) * params['Batch Size']).tolist())
 
         # goes through each array in array and writes it to a h5 file
         for i, batch in enumerate(batches):
@@ -199,8 +200,7 @@ def img_to_array(imgPth, dimensions):
         # makes it float 16 so it takes up less space
         img = img.astype(np.float16)
         # delets g and b rgb values to make balck and white
-        img = np.delete(img, 1, 2)
-        img = np.delete(img, 1, 2)
+        img = changeChannels3to1(img)
     except IOError:
         # if it failed to load the image it prints image path is bad
         print imgPth + " is bad"
@@ -208,3 +208,13 @@ def img_to_array(imgPth, dimensions):
         return None
     # if not, returns the image array
     return img
+
+
+def changeChannels3to1(img):
+    img = np.delete(img, 1, 2)
+    img = np.delete(img, 1, 2)
+    return img
+
+
+def PILimageToNumpy(img):
+    return changeChannels3to1(np.rot90(np.asarray(img))) * (1. / 255)
