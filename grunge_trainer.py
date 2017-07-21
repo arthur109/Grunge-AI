@@ -74,6 +74,9 @@ helper_functions.make_batches(params, [
 # Get list of directories of training batches
 train_batches = helper_functions.loadH5sFromFolder(
     params['Decompressed Train Image Directory'])
+
+train_batches2 = np.array(train_batches)
+
 # Get list of directories of evaluation batches
 eval_batches = helper_functions.loadH5sFromFolder(
     params['Decompressed Evaluation Image Directory'])
@@ -86,7 +89,7 @@ if params['Debug Mode']:
     print 'evaluation shape: ' + str(np.asarray(eval_batches).shape)
 
 # Creates the Neural Network
-model = helper_functions.makeModel(params)
+model = helper_functions.makeModelV2(params)
 
 # Loads previous model if it exists and the option is chosen
 if params['Should Load Model'] and isfile(params['Path To Model To Load']):
@@ -147,6 +150,8 @@ for r in range(params['Repetition Image Repetitions']):
     print 'Repetition: ' + str(r + 1) + '/' + str(params['Repetition Image Repetitions'])
     # loop that trains through the repetition images once
     for trainBatchNum in range(len(repit_batches)):
+
+        print('Loading Repetition Batch...')
 
         # Load Current Training Batch
         train_batch = helper_functions.loadBatch(repit_batches[trainBatchNum])

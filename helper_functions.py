@@ -7,7 +7,7 @@ import h5py
 import numpy as np
 import progressbar
 import scipy.misc
-from keras.layers import Dense, Input, Reshape
+from keras.layers import Dense, Input, Reshape, Lambda, concatenate, Activation
 from keras.models import Model
 from keras.preprocessing import image
 
@@ -57,18 +57,8 @@ def makeModel(params):
     return model
 
 
-'''
-def makeModelV2(params):
-    inputLayer = Input(shape=(params['Image Dimensions']['x'], params['Image Dimensions']['y'], 1))
-    # Flatten Out The Image
-    prevLayer = Reshape((params['Image Dimensions']['x'] * params['Image Dimensions']['y'], ))(inputLayer)
-    start = 2
-    end = 10
-    def getRange(layerBefore):
-        return layerBefore[start:end]
-    for i in
-    neuron1=Lambda(getRange)(prevLayer)
-'''
+def output_of_lambda(input_shape):
+    return (input_shape[0], 1)
 
 
 def saveImg(imgInput, filename, params):
@@ -166,7 +156,7 @@ def make_batches(params, inputOutputLocations):
         # and then splits it on that array (splits function on numbers in the array as index positions returning an array of arrays)
         # all in that line of code, below
         batches = np.split(images, (
-        np.array(range(1, int(len(images) / params['Batch Size']))) * params['Batch Size']).tolist())
+            np.array(range(1, int(len(images) / params['Batch Size']))) * params['Batch Size']).tolist())
 
         # goes through each array in array and writes it to a h5 file
         for i, batch in enumerate(batches):
