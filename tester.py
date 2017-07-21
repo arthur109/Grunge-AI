@@ -1,7 +1,8 @@
 import progressbar
-from keras.preprocessing import image
+from PIL import Image
 import numpy as np
 import helper_functions
+from os.path import isfile
 import os
 
 # Initialize Parameters for custumization
@@ -64,15 +65,11 @@ def cut_up_image(params):
     # create in witch to store the tiles
     os.makedirs(params['Decompressed Train Image Directory'] + '/tiles')
     # the big image that is to be tiled
-    mainImage = image.load_img(params['Main Image Directory'])
-
-    print image.img_to_array(mainImage).shape
-
-    helper_functions.saveImg(image.img_to_array(mainImage), "kljkjsdfl.png", params['Main Image Dimensions'])
+    mainImage = Image.open(params['Main Image Directory'])
 
     # checks if the image is the right diensions o that it can be tiled
     if (params['Main Image Dimensions']['x'] % params['Tile Dimensions']['x'] != 0) or (
-                    params['Main Image Dimensions']['y'] % params['Tile Dimensions']['y'] != 0):
+            params['Main Image Dimensions']['y'] % params['Tile Dimensions']['y'] != 0):
         # if it is not the right dimesnions it will notify the user
         print 'this image is not tileable'
 
@@ -87,14 +84,18 @@ def cut_up_image(params):
                        params['Main Image Dimensions']['y'] / tileYsize, tileXsize, tileYsize, 1))
     # loops through all positions in the array
     pbar = progressbar.ProgressBar()
-    for indX, column in enumerate(pbar(images)):
-        for indY, img in enumerate(column):
+    for indX, colum in enumerate(pbar(images)):
+        for indY, img in enumerate(colum):
             # the tile image
-            mainImageAsNumpy = image.img_to_array(mainImage)
-            cropped = helper_functions.cropNumpyImage(mainImageAsNumpy, indX * tileXsize, indY * tileYsize,
-                                                      (indX + 1) * tileXsize, (indY + 1) * tileYsize)
+            temporary = mainImage.crop(
+                (indX * tileXsize, indY * tileYsize, (indX + 1) * tileXsize, (indY + 1) * tileYsize))
+            # the variable that stores th ename of the image
+            name = params['Decompressed Train Image Directory'] + '/tiles' + "/img" + str(indX) + "|" + str(
+                indY) + ".jpg"
+            # save sthe image
+            temporary.save(name)
             # converts image into an array for storage in the array images
-            images[indX][indY] = helper_functions.changeChannels3to1(cropped)
+            images[indX][indY] = helper_functions.img_to_array(name, {'x': tileXsize, 'y': tileYsize})
     print 'done with tiles'
     print ''
     print 'making tile layers'

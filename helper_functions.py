@@ -1,7 +1,8 @@
+from keras.models import model_from_json
 from os.path import isfile, join
 from os import listdir
 import scipy.misc
-from keras.layers import Dense, Input, Reshape
+from keras.layers import Dense, Activation, Flatten, Input, Reshape, Lambda
 from keras.models import Model
 import h5py
 import numpy as np
@@ -55,19 +56,33 @@ def makeModel(params):
     return model
 
 
+'''
+def makeModelV2(params):
+    inputLayer = Input(shape=(params['Tile Dimensions']['x'], params['Tile Dimensions']['y'], 1))
+    # Flatten Out The Image
+    prevLayer = Reshape((params['Tile Dimensions']['x'] * params['Tile Dimensions']['y'], ))(inputLayer)
+    start = 2
+    end = 10
+    def getRange(layerBefore):
+        return layerBefore[start:end]
+    for i in
+    neuron1=Lambda(getRange)(prevLayer)
+'''
+
+
 # takes in the image array, the filename of the image to be saved, the dimensions of the image as {'x':x,'y':y}, and params
-def saveImg(imgInput, filename, dimensions):
+def saveImg(imgInput, filename, dimensions, params):
     # Make sure the array is the right shape
     imgInput = imgInput.reshape((dimensions['x'], dimensions['y'], 1))
     # Make the image have 3 channels
-    img = changeChannels1to3(imgInput, dimensions)
+    img = changeChannels1to3(imgInput, dimensions, params)
     # Save the image to the specified filename
     scipy.misc.toimage(img, cmin=0.0, cmax=1).save(filename)
 
 
 # converts an image with only one channel(black and white) and converts it to full rgb(uduplicates the channel)
 # so it can be properly exported to an image
-def changeChannels1to3(imgInput, dimensions):
+def changeChannels1to3(imgInput, dimensions, params):
     # Create A Blank Image With 3 Channels
     img = np.zeros((dimensions['x'], dimensions['y'], 3), dtype=np.float32)
     # Loop Through Each Row In the image
@@ -79,12 +94,6 @@ def changeChannels1to3(imgInput, dimensions):
                 img[h][i][0] = channel
                 img[h][i][1] = channel
                 img[h][i][2] = channel
-    return img
-
-
-def changeChannels3to1(img):
-    img = np.delete(img, 1, 2)
-    img = np.delete(img, 1, 2)
     return img
 
 
@@ -151,7 +160,7 @@ def make_batches(params, inputOutputLocations):
         # and then splits it on that array (splits function on numbers in the array as index positions returning an array of arrays)
         # all in that line of code, below
         batches = np.split(images, (
-            np.array(range(1, int(len(images) / params['Batch Size']))) * params['Batch Size']).tolist())
+        np.array(range(1, int(len(images) / params['Batch Size']))) * params['Batch Size']).tolist())
 
         # goes through each array in array and writes it to a h5 file
         for i, batch in enumerate(batches):
@@ -199,7 +208,3 @@ def img_to_array(imgPth, dimensions):
         return None
     # if not, returns the image array
     return img
-
-
-def cropNumpyImage(imageAsNp, startX, startY, endX, endY):
-    return imageAsNp[startX:endX, startY:endY]
