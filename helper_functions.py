@@ -81,6 +81,7 @@ def saveImg(imgInput, filename, dimensions):
     scipy.misc.toimage(img, cmin=0.0, cmax=1).save(filename)
 
 
+# performs transformations on image before saving it because sometimes problems are caused like distortion or incorrect rotation if they are not applied
 def saveImg2(imgInput, filename, dimensions):
     imgInput = imgInput.reshape((dimensions['x'], dimensions['y'], 1))
     saveImg(np.rot90(imgInput, k=-1), filename, {'x': dimensions['y'], 'y': dimensions['x']})
@@ -215,16 +216,20 @@ def img_to_array(imgPth, dimensions):
     return img
 
 
+# Strips a numpy array representing and image of 2 of its channels make sure the image is already in greyscale
 def changeChannels3to1(img):
+    # Removes channel 2 on the 3rd axis, -1 on both because it starts at 0
     img = np.delete(img, 1, 2)
     img = np.delete(img, 1, 2)
     return img
 
 
+# Converts A PIL Image to a numpy array and rotates it 90 degrees because other wise it is sideways for and unknow reason
 def PILimageToNumpy(img):
     return changeChannels3to1(np.rot90(np.asarray(img))) * (1. / 255)
 
 
+# Separates and image into tiles and returns them as an array of shape (num tiles x, num tiles y, size of tile x, size of tile y, 1 channel)
 def cut_up_image(params):
     print ''
     print 'making tiles'
