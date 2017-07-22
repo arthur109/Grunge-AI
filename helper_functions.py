@@ -1,11 +1,11 @@
-from keras.models import model_from_json
 from os.path import isfile, join
 from os import listdir
 import scipy.misc
-from keras.layers import Dense, Activation, Flatten, Input, Reshape, Lambda
+from keras.layers import Dense, Input, Reshape
 from keras.models import Model
 import h5py
 import numpy as np
+from PIL import Image
 from keras.preprocessing import image
 import progressbar
 import shutil
@@ -79,6 +79,11 @@ def saveImg(imgInput, filename, dimensions):
     # Save the image to the specified filename
 
     scipy.misc.toimage(img, cmin=0.0, cmax=1).save(filename)
+
+
+def saveImg2(imgInput, filename, dimensions):
+    imgInput = imgInput.reshape((dimensions['x'], dimensions['y'], 1))
+    saveImg(np.rot90(imgInput, k=-1), filename, {'x': dimensions['y'], 'y': dimensions['x']})
 
 
 # converts an image with only one channel(black and white) and converts it to full rgb(uduplicates the channel)
@@ -218,3 +223,85 @@ def changeChannels3to1(img):
 
 def PILimageToNumpy(img):
     return changeChannels3to1(np.rot90(np.asarray(img))) * (1. / 255)
+
+
+def cut_up_image(params):
+    print ''
+    print 'making tiles'
+    # create in witch to store the tiles
+    os.makedirs(params['Decompressed Train Image Directory'] + '/tiles')
+    # the big image that is to be tiled
+    mainImage = Image.open(params['Main Image Directory'])
+
+    # checks if the image is the right diensions o that it can be tiled
+    if (params['Main Image Dimensions']['x'] % params['Tile Dimensions']['x'] != 0) or (
+                    params['Main Image Dimensions']['y'] % params['Tile Dimensions']['y'] != 0):
+        # if it is not the right dimesnions it will notify the user
+        print 'this image is not tileable'
+
+    # the x width of a tile
+    tileXsize = params['Main Image Dimensions']['x'] / params['Tile Dimensions']['x']
+
+    # the y height of a tile
+    tileYsize = params['Main Image Dimensions']['y'] / params['Tile Dimensions']['y']
+
+    # createds the 2d array that will store tht tiles
+    tiles = np.zeros((params['Main Image Dimensions']['x'] / tileXsize,
+                      params['Main Image Dimensions']['y'] / tileYsize, tileXsize, tileYsize, 1))
+    # loops through all positions in the array
+    pbar = progressbar.ProgressBar()
+    for indX, colum in enumerate(pbar(tiles)):
+        for indY, img in enumerate(colum):
+            # the tile image
+            temporary = mainImage.crop(
+                (indX * tileXsize, indY * tileYsize, (indX + 1) * tileXsize, (indY + 1) * tileYsize))
+
+            # converts image into an array for storage in the array images
+            tiles[indX][indY] = PILimageToNumpy(temporary)
+    print 'done with tiles'
+    print ''
+    print 'making tile layers'
+    # array that will store the tiles ocnverted to 128*128 images
+    imgLayers = np.zeros((tileXsize, tileYsize, params['Tile Dimensions']['x'], params['Tile Dimensions']['y'], 1))
+
+    pbar = progressbar.ProgressBar()
+    # will loop through all tile and creat the layers and splits them into mixed processes
+    for pixelToExtractX in pbar(range(tileXsize)):
+        for pixelToExtractY in range(tileYsize):
+            # creates the array that will store an image made from one pixel of each tile
+            singleLayer = np.zeros((params['Tile Dimensions']['x'], params['Tile Dimensions']['y'], 1))
+            # goes throught each tile
+            for tilePosX in range(len(tiles)):
+                for tilePosY in range(len(tiles[tilePosX])):
+                    # and adds the specified pixel so "singleLayer"
+                    singleLayer[tilePosX][tilePosY] = tiles[tilePosX][tilePosY][pixelToExtractX][pixelToExtractY]
+            # then adds 'singleLayer' to the main array
+            imgLayers[pixelToExtractX][pixelToExtractY] = np.flip(singleLayer, 0)
+
+    print imgLayers.shape
+
+    print 'done with tile layers'
+    # then returns the final result
+    return imgLayers
+
+
+def reconstitute_images(params, imgLayers):
+    print ''
+    print 'reconsituting image'
+    # the x width of a tile
+    tileXsize = params['Main Image Dimensions']['x'] / params['Tile Dimensions']['x']
+
+    # the y height of a tile
+    tileYsize = params['Main Image Dimensions']['y'] / params['Tile Dimensions']['y']
+
+    # the array that will store the reconstituted image
+    mainImage = np.zeros((params['Main Image Dimensions']['x'], params['Main Image Dimensions']['y'], 1))
+    pbar = progressbar.ProgressBar()
+    for x in pbar(range(tileXsize)):
+        for y in range(tileYsize):
+            processedTile = imgLayers[x][y]
+            for tileX, column in enumerate(processedTile):
+                for tileY, pixel in enumerate(column):
+                    mainImage[tileX * tileXsize + x][tileY * tileYsize + y] = pixel
+
+    return mainImage

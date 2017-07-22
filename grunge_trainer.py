@@ -13,9 +13,9 @@ import progressbar
 params = {'Tile Dimensions': {'x': 128, 'y': 128}}
 params = {
     # The idmensions of the large mimage to be processed
-    'Main Image Dimensions': {'x': 1280, 'y': 1280},
+    'Main Image Dimensions': {'x': 1280, 'y': 640},
     # Directory of the Main image to be proceessed
-    'Main Image Directory': '1280.jpg',
+    'Main Image Directory': '1280*640.png',
     # Ignore this
     'Tile Dimensions': params['Tile Dimensions'],
     # Print Debug Output
@@ -25,7 +25,7 @@ params = {
     # size of small batches in each normal batch:
     'Micro Batch Size': 2,
     # How many times to repatedly train on the images in the Repition folder
-    'Repetition Image Repitions': 10,
+    'Repetition Image Repitions': 1,
     # Directory of the images that it will be repeatedly trained on.
     'Compressed Repition Training Folder Directory': 'dataset/Repeated_Images',
     # directory containing jpg
@@ -161,10 +161,9 @@ for r in range(params['Repetition Image Repitions']):
                 helper_functions.saveImg(train_batch[i],
                                          params['Evaluation Save Directory'] + "/repitions/Batch " + str(
                                              trainBatchNum) + "-Eval " + str(outImgID) + "-input-repition.png",
-                                         params['Tile Dimensions'], params)
+                                         params['Tile Dimensions'])
 
                 helper_functions.saveImg(evaluation, params['Evaluation Save Directory'] + "/repitions/Batch " + str(
-                    trainBatchNum) + "-Eval " + str(outImgID) + "-output-repition.png", params['Tile Dimensions'],
-                                         params)
+                    trainBatchNum) + "-Eval " + str(outImgID) + "-output-repition.png", params['Tile Dimensions'])
 
                 outImgID += 1
