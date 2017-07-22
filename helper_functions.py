@@ -56,20 +56,6 @@ def makeModel(params):
     return model
 
 
-'''
-def makeModelV2(params):
-    inputLayer = Input(shape=(params['Tile Dimensions']['x'], params['Tile Dimensions']['y'], 1))
-    # Flatten Out The Image
-    prevLayer = Reshape((params['Tile Dimensions']['x'] * params['Tile Dimensions']['y'], ))(inputLayer)
-    start = 2
-    end = 10
-    def getRange(layerBefore):
-        return layerBefore[start:end]
-    for i in
-    neuron1=Lambda(getRange)(prevLayer)
-'''
-
-
 # takes in the image array, the filename of the image to be saved, the dimensions of the image as {'x':x,'y':y}, and params
 def saveImg(imgInput, filename, dimensions):
     # Make sure the array is the right shape
@@ -284,7 +270,7 @@ def cut_up_image(params):
     # then returns the final result
     return imgLayers
 
-
+# reconverts the processed/commpressed image format into a normal image that you can see
 def reconstitute_images(params, imgLayers):
     print ''
     print 'reconsituting image'
@@ -297,11 +283,15 @@ def reconstitute_images(params, imgLayers):
     # the array that will store the reconstituted image
     mainImage = np.zeros((params['Main Image Dimensions']['x'], params['Main Image Dimensions']['y'], 1))
     pbar = progressbar.ProgressBar()
+    # goes through each 128*128 tile
     for x in pbar(range(tileXsize)):
         for y in range(tileYsize):
+            #stores the 128*128 in the array processedTile
             processedTile = imgLayers[x][y]
+            # loops through each pixel in processedTile
             for tileX, column in enumerate(processedTile):
                 for tileY, pixel in enumerate(column):
+                    # and assignes it to its Corresponding position which is (which pixel its on * the 5*5 tile size + which layer its doing (top right corner, ect...))
                     mainImage[tileX * tileXsize + x][tileY * tileYsize + y] = pixel
 
     return mainImage
